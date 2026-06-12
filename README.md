@@ -74,3 +74,189 @@ vs Severe class (4.4%) addressed using class-weighted loss function
 ---
 
 ## 🏗️ Project Pipeline
+
+Raw CPCB Data (30 CSV files, 5 cities × 6 years)
+
+↓
+
+Data Loading & City Tagging
+
+↓
+
+Column Cleaning & Type Fixing
+
+↓
+
+Official CPCB AQI Calculation
+
+↓
+
+Missing Value Treatment (City-wise Median Imputation)
+
+↓
+
+Feature Engineering (Month, Year, One-Hot City Encoding)
+
+↓
+
+Train-Test Split (80/20, Stratified)
+
+↓
+
+StandardScaler Normalization
+
+↓
+
+Class Weight Computation
+
+↓
+
+3-Layer ANN Training (PyTorch) with Early Stopping
+
+↓
+
+Evaluation (Accuracy, F1, Confusion Matrix)
+
+---
+
+## 🧠 Model Architecture
+
+Input Layer         →  17 features
+
+Hidden Layer 1      →  128 neurons | BatchNorm | ReLU | Dropout(0.3)
+
+Hidden Layer 2      →   64 neurons | BatchNorm | ReLU | Dropout(0.3)
+
+Hidden Layer 3      →   32 neurons | BatchNorm | ReLU | Dropout(0.2)
+
+Output Layer        →    6 neurons | Softmax
+
+
+**Training Config:**
+- Optimizer: Adam (lr=0.001)
+- Loss: CrossEntropyLoss with class weights
+- Batch Size: 32
+- Early Stopping: Patience = 10 epochs
+- Best model checkpoint saved automatically
+
+---
+
+## 📊 Results
+
+### Classification Report
+
+| Class | Precision | Recall | F1-Score |
+|-------|-----------|--------|----------|
+| Good | 0.72 | 0.93 | 0.81 |
+| Satisfactory | 0.90 | 0.80 | 0.84 |
+| Moderate | 0.91 | 0.84 | 0.88 |
+| Poor | 0.71 | 0.92 | 0.80 |
+| Very Poor | 0.91 | 0.91 | 0.91 |
+| **Severe** | **0.92** | **0.93** | **0.92** |
+| **Overall** | | | **0.85** |
+
+### Key Observation
+All misclassifications occur between **neighboring AQI categories** 
+(e.g., Good↔Satisfactory, Poor↔Moderate) — the model never confuses 
+Good with Severe. This is the expected behaviour of a well-trained 
+ordinal classifier.
+
+---
+
+## 🛠️ Tech Stack
+
+| Category | Tools |
+|----------|-------|
+| Language | Python 3.12 |
+| Deep Learning | PyTorch 2.11 |
+| ML & Preprocessing | scikit-learn |
+| Data Processing | Pandas, NumPy |
+| Visualization | Matplotlib, Seaborn |
+| Environment | Google Colab |
+| Data Source | CPCB CAAQMS Portal |
+
+---
+
+## 📁 Folder Structure
+
+AQI-Severity-Prediction-India-ANN/
+│
+├── data/
+│   └── AQI_Clean_Dataset.csv        # Cleaned master dataset
+│
+├── notebooks/
+│   ├── AQI_Data_Pipeline.ipynb      # Data collection, cleaning, EDA
+│   └── AQI_ANN_Model.ipynb          # Model training & evaluation
+│
+├── models/
+│   ├── AQI_ANN_model.pth            # Saved PyTorch model weights
+│   ├── scaler.pkl                   # StandardScaler for inference
+│   └── label_encoder.pkl            # LabelEncoder for class decoding
+│
+├── plots/
+│   ├── Plot1_AQI_Distribution.png
+│   ├── Plot2_Citywise_AQI.png
+│   ├── Plot3_Monthly_Trend.png
+│   ├── Plot4_Correlation_Heatmap.png
+│   ├── Plot5_Yearly_Trend.png
+│   ├── Plot6_COVID_Impact.png
+│   ├── Plot7_Confusion_Matrix.png
+│   └── Plot8_Training_Curves.png
+│
+├── .gitignore
+├── LICENSE
+└── README.md
+
+---
+
+## ▶️ How to Run
+
+**1. Clone the repository**
+```bash
+git clone https://github.com/MYANK-11/AQI-Severity-Prediction-India-ANN.git
+```
+
+**2. Open in Google Colab**
+- Upload `AQI_Data_Pipeline.ipynb` to Colab
+- Download raw data from 
+  [CPCB CAAQMS Portal](https://airquality.cpcb.gov.in)
+- Run all cells sequentially
+
+**3. Train the model**
+- Open `AQI_ANN_Model.ipynb` in Colab
+- Load `AQI_Clean_Dataset.csv` from your Drive
+- Run all cells sequentially
+
+**4. Saved model inference**
+```python
+import torch, pickle
+from model import AQI_ANN
+
+# Load artifacts
+model.load_state_dict(torch.load('models/AQI_ANN_model.pth'))
+with open('models/scaler.pkl', 'rb') as f:
+    scaler = pickle.load(f)
+with open('models/label_encoder.pkl', 'rb') as f:
+    le = pickle.load(f)
+```
+
+---
+
+## 👤 Author
+
+**Mayank P. Savani**
+---
+
+## 📌 Note
+
+This project is Phase 1 of a larger initiative.
+**Phase 2** (in progress) will include:
+- REST API using FastAPI
+- Real-time Streamlit dashboard
+- Cloud deployment
+
+---
+
+*Data sourced directly from India's Central Pollution Control Board (CPCB) — 
+the same data used by the Government of India for official AQI reporting.*
+
