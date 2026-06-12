@@ -176,7 +176,7 @@ ordinal classifier.
 | Data Source | CPCB CAAQMS Portal |
 
 ---
-
+```
 ## 📁 Folder Structure
 
 AQI-Severity-Prediction-India-ANN/
@@ -206,7 +206,7 @@ AQI-Severity-Prediction-India-ANN/
 ├── .gitignore
 ├── LICENSE
 └── README.md
-
+```
 ---
 
 ## ▶️ How to Run
@@ -245,7 +245,7 @@ with open('models/label_encoder.pkl', 'rb') as f:
 ## 👤 Author
 
 **Mayank P. Savani**
----
+
 
 ## 📌 Note
 
