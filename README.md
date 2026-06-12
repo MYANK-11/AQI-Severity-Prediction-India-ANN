@@ -1,6 +1,6 @@
 # 🌫️ AQI Severity Prediction for Indian Cities using ANN
 
-> Predicting Air Quality Index (AQI) severity categories — **Good to Severe** — 
+> Predicting Air Quality Index (AQI) severity categories - **Good to Severe** 
 > for 5 major Indian cities using a 3-layer Artificial Neural Network (PyTorch) 
 > trained on **9,399 real CPCB sensor records** spanning 2019–2024.
 
