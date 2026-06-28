@@ -5,6 +5,13 @@
 > trained on **9,399 real CPCB sensor records** spanning 2019–2024.
 
 ---
+## 🚀 Live Demo
+
+**Try the deployed application:** [aqi-severity-predictor.streamlit.app](https://aqi-severity-predictor.streamlit.app)
+
+⚠️ *Note: The backend API runs on a free-tier server and may take ~50 seconds to wake up on the first request after inactivity.*
+
+---
 
 ## 🏆 Key Results
 
@@ -72,65 +79,62 @@ validating data authenticity
 vs Severe class (4.4%) addressed using class-weighted loss function
 
 ---
+## 🏗️ Model Training Pipeline
 
-## 🏗️ Project Pipeline
-
+```
 Raw CPCB Data (30 CSV files, 5 cities × 6 years)
-
 ↓
-
 Data Loading & City Tagging
-
 ↓
-
 Column Cleaning & Type Fixing
-
 ↓
-
 Official CPCB AQI Calculation
-
 ↓
-
 Missing Value Treatment (City-wise Median Imputation)
-
 ↓
-
 Feature Engineering (Month, Year, One-Hot City Encoding)
-
 ↓
-
 Train-Test Split (80/20, Stratified)
-
 ↓
-
 StandardScaler Normalization
-
 ↓
-
 Class Weight Computation
-
 ↓
-
 3-Layer ANN Training (PyTorch) with Early Stopping
-
 ↓
-
 Evaluation (Accuracy, F1, Confusion Matrix)
+↓
+Saved Model Artifacts (.pth, scaler.pkl, label_encoder.pkl)
+```
 
+---
+
+## 🚀 Deployment Pipeline
+
+```
+Saved Model Artifacts
+↓
+FastAPI Backend — Loads model, exposes /predict endpoint
+↓
+Deployed on Render (Public REST API)
+↓
+Streamlit Dashboard — Sends user input to API via HTTP
+↓
+Deployed on Streamlit Community Cloud (Public Web App)
+↓
+Real-time AQI Severity Prediction with Health Advisory
+```
 ---
 
 ## 🧠 Model Architecture
 
+```
 Input Layer         →  17 features
-
 Hidden Layer 1      →  128 neurons | BatchNorm | ReLU | Dropout(0.3)
-
 Hidden Layer 2      →   64 neurons | BatchNorm | ReLU | Dropout(0.3)
-
 Hidden Layer 3      →   32 neurons | BatchNorm | ReLU | Dropout(0.2)
-
 Output Layer        →    6 neurons | Softmax
-
+```
 
 **Training Config:**
 - Optimizer: Adam (lr=0.001)
@@ -138,7 +142,6 @@ Output Layer        →    6 neurons | Softmax
 - Batch Size: 32
 - Early Stopping: Patience = 10 epochs
 - Best model checkpoint saved automatically
-
 ---
 
 ## 📊 Results
@@ -172,14 +175,25 @@ ordinal classifier.
 | ML & Preprocessing | scikit-learn |
 | Data Processing | Pandas, NumPy |
 | Visualization | Matplotlib, Seaborn |
-| Environment | Google Colab |
+| Backend API | FastAPI, Uvicorn |
+| Frontend Dashboard | Streamlit |
+| Deployment | Render (API), Streamlit Community Cloud (Dashboard) |
+| Development Environment | Google Colab, VS Code |
 | Data Source | CPCB CAAQMS Portal |
-
 ---
-```
-## 📁 Folder Structure
 
+## 📁 Folder Structure
+```
 AQI-Severity-Prediction-India-ANN/
+│
+├── api/
+│   ├── main.py                      # FastAPI backend - prediction endpoint
+│   ├── model.py                     # ANN architecture definition
+│   └── requirements.txt             # API dependencies
+│
+├── dashboard/
+│   ├── app.py                       # Streamlit dashboard
+│   └── requirements.txt             # Dashboard dependencies
 │
 ├── data/
 │   └── AQI_Clean_Dataset.csv        # Cleaned master dataset
@@ -227,18 +241,44 @@ git clone https://github.com/MYANK-11/AQI-Severity-Prediction-India-ANN.git
 - Load `AQI_Clean_Dataset.csv` from your Drive
 - Run all cells sequentially
 
-**4. Saved model inference**
+**4. Use the saved model for inference**
+
 ```python
 import torch, pickle
 from model import AQI_ANN
 
-# Load artifacts
-model.load_state_dict(torch.load('models/AQI_ANN_model.pth'))
-with open('models/scaler.pkl', 'rb') as f:
-    scaler = pickle.load(f)
+# Load label encoder and scaler
 with open('models/label_encoder.pkl', 'rb') as f:
     le = pickle.load(f)
+with open('models/scaler.pkl', 'rb') as f:
+    scaler = pickle.load(f)
+
+# Recreate architecture and load trained weights
+model = AQI_ANN(input_size=17, num_classes=len(le.classes_))
+model.load_state_dict(torch.load('models/AQI_ANN_model.pth', map_location='cpu'))
+model.eval()
 ```
+
+
+**5. Run the API and Dashboard locally (optional)**
+
+Start the FastAPI backend:
+```bash
+cd api
+pip install -r requirements.txt
+python -m uvicorn main:app --reload
+```
+
+In a new terminal, start the Streamlit dashboard:
+```bash
+cd dashboard
+pip install -r requirements.txt
+python -m streamlit run app.py
+```
+
+> **Note:** To run locally, update the API URL inside `dashboard/app.py` 
+> from the deployed Render URL back to `http://127.0.0.1:8000/predict`
+
 
 ---
 
@@ -247,14 +287,15 @@ with open('models/label_encoder.pkl', 'rb') as f:
 **Mayank P. Savani**
 
 
-## 📌 Note
+## 📌 Project Status
 
-This project is Phase 1 of a larger initiative.
-**Phase 2** (in progress) will include:
-- REST API using FastAPI
-- Real-time Streamlit dashboard
-- Cloud deployment
+✅ **Phase 1 — Model Development:** Complete
+- Data pipeline, EDA, and ANN training (85.27% accuracy)
 
+✅ **Phase 2 — Production Deployment:** Complete
+- REST API built with FastAPI, deployed on Render
+- Interactive dashboard built with Streamlit, deployed on Streamlit Cloud
+- Fully functional end-to-end live system
 ---
 
 *Data sourced directly from India's Central Pollution Control Board (CPCB) — 
